@@ -1,0 +1,76 @@
+@using EventEase.Models
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-primary text-white py-3">
+        <h5 class="card-title mb-0 fw-semibold">
+            <i class="bi bi-person-plus-fill me-2"></i>Quick Event Registration
+        </h5>
+    </div>
+    <div class="card-body p-4">
+        @if (showSuccessAlert)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Success!</strong> <em>@lastRegisteredName</em> has been registered successfully.
+                <button type="button" class="btn-close" @onclick="DismissSuccessAlert" aria-label="Close"></button>
+            </div>
+        }
+
+        <EditForm Model="@registrationModel" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label for="fullName" class="form-label fw-bold">Full Name</label>
+                <InputText id="fullName"
+                           class="form-control"
+                           placeholder="Enter your full name (e.g. Alex Smith)"
+                           @bind-Value="registrationModel.Name" />
+                <ValidationMessage For="@(() => registrationModel.Name)" class="text-danger small" />
+            </div>
+
+            <div class="mb-3">
+                <label for="emailAddress" class="form-label fw-bold">Email Address</label>
+                <InputText id="emailAddress"
+                           type="email"
+                           class="form-control"
+                           placeholder="Enter your email (e.g. alex@example.com)"
+                           @bind-Value="registrationModel.Email" />
+                <ValidationMessage For="@(() => registrationModel.Email)" class="text-danger small" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fw-semibold py-2">
+                <i class="bi bi-check-circle me-1"></i> Register Attendee
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<string> OnUserRegistered { get; set; }
+
+    private RegistrationModel registrationModel = new();
+    private bool showSuccessAlert = false;
+    private string lastRegisteredName = string.Empty;
+
+    private async Task HandleValidSubmit()
+    {
+        string submittedName = registrationModel.Name.Trim();
+
+        // Trigger EventCallback to notify parent component with the attendee's name
+        if (OnUserRegistered.HasDelegate)
+        {
+            await OnUserRegistered.InvokeAsync(submittedName);
+        }
+
+        lastRegisteredName = submittedName;
+        showSuccessAlert = true;
+
+        // Reset form model to allow new registrations
+        registrationModel = new RegistrationModel();
+    }
+
+    private void DismissSuccessAlert()
+    {
+        showSuccessAlert = false;
+    }
+}

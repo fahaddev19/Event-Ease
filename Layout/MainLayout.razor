@@ -1,0 +1,21 @@
+@inherits LayoutComponentBase
+
+<div class="d-flex flex-column min-vh-100">
+    <!-- Navigation Bar -->
+    <header>
+        <NavMenu />
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="flex-grow-1">
+        @Body
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4 mt-auto border-top">
+        <div class="container">
+            <p class="mb-1 fw-semibold">&copy; @DateTime.Now.Year EventEase - Modern Blazor Event Management</p>
+            <small class="text-secondary">Built with Blazor, C#, and Bootstrap 5</small>
+        </div>
+    </footer>
+</div>

@@ -1,0 +1,150 @@
+@page "/event/{Id:int}"
+@rendermode InteractiveServer
+
+@using EventEase.Models
+@inject NavigationManager Navigation
+
+<PageTitle>@(currentEvent != null ? currentEvent.Title : "Event Not Found") - EventEase</PageTitle>
+
+<div class="container my-5">
+    @if (eventNotFound)
+    {
+        <!-- Graceful Error / Debug Handling when an invalid ID is provided -->
+        <div class="card border-danger shadow-sm text-center p-5">
+            <div class="card-body">
+                <div class="text-danger mb-3">
+                    <i class="bi bi-exclamation-triangle-fill" style="font-size: 3.5rem;"></i>
+                </div>
+                <h2 class="card-title text-danger fw-bold">Event Not Found</h2>
+                <p class="card-text text-muted fs-5 mt-2">
+                    We could not find an event with ID <strong>#@Id</strong>. The event may have been removed or the link may be invalid.
+                </p>
+                <div class="mt-4">
+                    <button class="btn btn-primary btn-lg px-4" @onclick="NavigateBack">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Events
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+    else if (currentEvent != null)
+    {
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/events" class="text-decoration-none">Events</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">@currentEvent.Title</li>
+            </ol>
+        </nav>
+
+        <!-- Event Details Card -->
+        <div class="card shadow border-0 overflow-hidden">
+            <div class="card-header bg-primary text-white py-4 px-4 px-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-light text-primary fs-6 px-3 py-1 fw-bold">
+                        Event #@currentEvent.Id
+                    </span>
+                    <span class="badge bg-warning text-dark px-3 py-1">
+                        Confirmed Schedule
+                    </span>
+                </div>
+                <h1 class="display-6 fw-bold mb-0">@currentEvent.Title</h1>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded border">
+                            <h6 class="text-secondary text-uppercase fw-bold small mb-1">
+                                <i class="bi bi-calendar3 text-primary me-2"></i>Date & Time
+                            </h6>
+                            <p class="fs-5 fw-semibold text-dark mb-0">
+                                @currentEvent.Date.ToString("dddd, MMMM dd, yyyy")
+                            </p>
+                            <span class="text-muted">@currentEvent.Date.ToString("hh:mm tt") (Local Time)</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded border">
+                            <h6 class="text-secondary text-uppercase fw-bold small mb-1">
+                                <i class="bi bi-geo-alt-fill text-danger me-2"></i>Venue / Location
+                            </h6>
+                            <p class="fs-5 fw-semibold text-dark mb-0">
+                                @currentEvent.Location
+                            </p>
+                            <span class="text-muted">In-person & Hybrid Stream Access</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold text-dark mb-3">About This Event</h5>
+                <p class="lead text-secondary lh-lg mb-4">
+                    @currentEvent.Description
+                </p>
+
+                <hr class="my-4" />
+
+                <!-- Navigation Controls -->
+                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                    <button class="btn btn-outline-secondary px-4 py-2" @onclick="NavigateBack">
+                        <i class="bi bi-arrow-left me-2"></i>Back to All Events
+                    </button>
+                    <a href="/events" class="btn btn-success px-4 py-2">
+                        <i class="bi bi-person-check me-2"></i>Register for this Event
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private EventModel? currentEvent;
+    private bool eventNotFound = false;
+
+    // Shared mock events repository
+    private readonly List<EventModel> mockEvents = new()
+    {
+        new EventModel
+        {
+            Id = 1,
+            Title = "Tech Innovators Summit 2026",
+            Date = new DateTime(2026, 6, 15, 9, 30, 0),
+            Location = "Metropolitan Convention Center, Hall A",
+            Description = "Join global tech leaders, AI engineers, and industry visionaries to explore breakthroughs in artificial intelligence, cloud architecture, and modern application ecosystems."
+        },
+        new EventModel
+        {
+            Id = 2,
+            Title = "Full-Stack Blazor & Cloud Masterclass",
+            Date = new DateTime(2026, 7, 20, 10, 0, 0),
+            Location = "Downtown Tech Hub & Online Live Stream",
+            Description = "An intensive deep-dive into high-performance full-stack Blazor web development, server/WASM render modes, C# state management, and enterprise deployment."
+        },
+        new EventModel
+        {
+            Id = 3,
+            Title = "Cybersecurity & DevOps World Forum",
+            Date = new DateTime(2026, 8, 5, 13, 0, 0),
+            Location = "Silicon Valley Innovation Arena",
+            Description = "Discover cutting-edge strategies for zero-trust security, CI/CD pipeline automation, threat modeling, and resilient infrastructure management."
+        }
+    };
+
+    // OnParametersSet triggers whenever the route parameter `Id` changes
+    protected override void OnParametersSet()
+    {
+        currentEvent = mockEvents.FirstOrDefault(e => e.Id == Id);
+        eventNotFound = (currentEvent == null);
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/events");
+    }
+}

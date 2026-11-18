@@ -1,0 +1,111 @@
+@page "/events"
+@page "/"
+@rendermode InteractiveServer
+
+@using EventEase.Models
+@using EventEase.Components
+@inject NavigationManager Navigation
+
+<PageTitle>Events - EventEase</PageTitle>
+
+<div class="container my-4">
+    <!-- Header Hero Banner -->
+    <div class="p-4 p-md-5 mb-4 rounded text-white bg-dark shadow-sm">
+        <div class="col-md-8 px-0">
+            <h1 class="display-5 fst-italic fw-bold">EventEase Portal</h1>
+            <p class="lead my-3">
+                Discover upcoming tech conferences, register attendees with real-time state tracking, and explore detailed event schedules.
+            </p>
+        </div>
+    </div>
+
+    <!-- Section 1: Featured Events List -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold text-dark mb-0">
+            <i class="bi bi-calendar3 me-2 text-primary"></i>Upcoming Events
+        </h3>
+        <span class="badge bg-secondary">@events.Count Events Available</span>
+    </div>
+
+    <div class="row g-4 mb-5">
+        @foreach (var ev in events)
+        {
+            <div class="col-12 col-md-6 col-lg-4">
+                <!-- EventCard wrapped in an anchor tag that navigates to the event details page -->
+                <div class="h-100 d-flex flex-column">
+                    <a href="@($"/event/{ev.Id}")" class="text-decoration-none text-reset flex-grow-1 d-block mb-2">
+                        <EventCard Event="ev" />
+                    </a>
+                    <!-- Direct navigation button alternative -->
+                    <button class="btn btn-outline-primary w-100" @onclick="@(() => NavigateToDetails(ev.Id))">
+                        View Details for @ev.Title &rarr;
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <hr class="my-5" />
+
+    <!-- Section 2: Registration & Attendance State Management -->
+    <div class="row g-4">
+        <div class="col-12 col-lg-5">
+            <RegistrationForm OnUserRegistered="HandleUserRegistered" />
+        </div>
+        <div class="col-12 col-lg-7">
+            <AttendanceTracker RegisteredUsers="registeredAttendees" />
+        </div>
+    </div>
+</div>
+
+@code {
+    // Mock list of events
+    private List<EventModel> events = new()
+    {
+        new EventModel
+        {
+            Id = 1,
+            Title = "Tech Innovators Summit 2026",
+            Date = new DateTime(2026, 6, 15, 9, 30, 0),
+            Location = "Metropolitan Convention Center, Hall A",
+            Description = "Join global tech leaders, AI engineers, and industry visionaries to explore breakthroughs in artificial intelligence, cloud architecture, and modern application ecosystems."
+        },
+        new EventModel
+        {
+            Id = 2,
+            Title = "Full-Stack Blazor & Cloud Masterclass",
+            Date = new DateTime(2026, 7, 20, 10, 0, 0),
+            Location = "Downtown Tech Hub & Online Live Stream",
+            Description = "An intensive deep-dive into high-performance full-stack Blazor web development, server/WASM render modes, C# state management, and enterprise deployment."
+        },
+        new EventModel
+        {
+            Id = 3,
+            Title = "Cybersecurity & DevOps World Forum",
+            Date = new DateTime(2026, 8, 5, 13, 0, 0),
+            Location = "Silicon Valley Innovation Arena",
+            Description = "Discover cutting-edge strategies for zero-trust security, CI/CD pipeline automation, threat modeling, and resilient infrastructure management."
+        }
+    };
+
+    // State management: Parent-level list of registered users
+    private List<string> registeredAttendees = new()
+    {
+        "Jordan Lee",
+        "Samantha Ray"
+    };
+
+    // State handler: Invoked by RegistrationForm's EventCallback<string>
+    private void HandleUserRegistered(string newAttendee)
+    {
+        if (!string.IsNullOrWhiteSpace(newAttendee))
+        {
+            registeredAttendees.Add(newAttendee);
+        }
+    }
+
+    private void NavigateToDetails(int eventId)
+    {
+        Navigation.NavigateTo($"/event/{eventId}");
+    }
+}
